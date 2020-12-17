@@ -6,3 +6,11 @@ Demo: https://kirillbobkov.github.io/superman-game/
 Tools:	Webpack, Git, Gitlab, ES Lint, Visual Studio Code, Chrome Developer Tools.
 
 Technologies:	HTML5 Canvas, CSS3, SASS, JavaScript (ECMAScript 6), OOP, Design Patterns.
+
+To start project:
+1) clone repository
+2) open terminal and type "npm install"
+3) after installation, type "npm start"
+
+To build project:
+1) open terminal and type "npm run build"
