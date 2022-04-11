@@ -24,7 +24,6 @@ const onKeyUp = (event) => {
 window.document.addEventListener('keydown', onKeyDown);
 window.document.addEventListener('keyup', onKeyUp);
 
-
 function Init() {
   this.pause = () => {
     game.running = false;

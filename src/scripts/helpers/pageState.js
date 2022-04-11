@@ -5,3 +5,7 @@ export const disablePage = (page) => {
 export const enablePage = (page) => {
   page.style.display = 'block';
 };
+
+export const enableMain = (main) => {
+  main.style.display = 'flex';
+};

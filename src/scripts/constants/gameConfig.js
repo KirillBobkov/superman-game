@@ -1,5 +1,22 @@
 import { imageAdapter } from '../helpers';
 
+export const imageUrls = [
+  'public/back3.png',
+  'public/barrier1.png',
+  'public/barrier2.png',
+  'public/barrier3.png',
+  'public/barrier4.png',
+  'public/barrier5.png',
+  'public/barrier6.png',
+  'public/barrier7.png',
+  'public/bonus.png',
+  'public/bonusSpeed.png',
+  'public/controls.png',
+  'public/explosion.png',
+  'public/superman.png',
+  'public/supermanBoost.png',
+];
+
 export const unitConfig = {
   image: imageAdapter('public/superman.png'),
   width: 25,

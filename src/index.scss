@@ -6,12 +6,7 @@ html, body {
     font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
-    background-color: #000000;
-}
-
-body {
- 
-    background-size: cover;
+    background-color: #2d2d2d;
 }
 
 p {
@@ -20,7 +15,6 @@ p {
 
 .main {
     height: 100%;
-    display: flex;
     justify-content: center;
     color: #ffffff;
 }
@@ -79,6 +73,8 @@ p {
   text-transform: uppercase;
   text-align: center;
   transition: .8s cubic-bezier(.165,.84,.44,1);
+  cursor: pointer;
+  border-radius: 30px;
 
   &--hover:hover {
     background: rgb(46, 50, 255);
@@ -97,28 +93,31 @@ p {
     left: 0;
     bottom: 0;
     right: 0 ;
-    background-color: #000000;
+    background-color: #323232;
  
     background-size: cover;
 
     &__title {
-        margin-left: 100px;
         margin-top: 100px;
-        margin-bottom: 20px;
+        margin-bottom: 40px;
         text-transform: uppercase;
         color: red;
         font-size: 50px;
+        text-align: center;
     }
 
     &__description {
         color: blue;
-        margin-left: 100px;
+        text-align: center;
         font-size: 18px;
+        color: #5252ff;
+        margin-bottom: 40px;
     }
 
     &__button {
-        margin-left: 100px;
         width: 300px;
+        text-align: center;
+        margin: 0 auto;
     }
 }
 

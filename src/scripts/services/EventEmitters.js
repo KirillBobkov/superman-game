@@ -1,6 +1,7 @@
 export const currentScoreField = window.document.getElementById('outputScore');
 export const currentHealthField = window.document.getElementById('outputHealth');
 
+export const main = document.getElementById('main');
 export const welcomePage = document.getElementById('welcomePage');
 export const gameOverPage = document.getElementById('gameOverPage');
 
