@@ -9,7 +9,7 @@ export const getBestResult = (field) => {
   field.innerHTML = sessionStorage.getItem('bestScore') || 0;
 };
 
-export const setCurrentDataOfGame = (game, scoreInput, healthInput) => {
-  scoreInput.innerHTML = game.unit.score;
-  healthInput.innerHTML = game.unit.health;
+export const setCurrentDataOfGame = (unit, scoreInput, healthInput) => {
+  scoreInput.innerHTML = unit.score;
+  healthInput.innerHTML = unit.health;
 };

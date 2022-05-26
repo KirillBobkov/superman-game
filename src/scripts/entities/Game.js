@@ -1,193 +1,236 @@
 import { KEY_CODES, unitConfig, backgroundConfig, enemyConfig, bonusConfig, explosionConfig } from '../constants';
 import { playField } from '../services';
-import { Enemy, Bonus, Explosion, Background, Unit } from './index';
+import { Enemy, Bonus, Explosion } from './index';
 import { collisionCheck, generateRandomXPosition, imageAdapter, chooseSrcForEnemy } from '../helpers';
+import {
+  welcomePage,
+  gameOverPage,
+  bestScoreField,
+  currentScoreField,
+  currentHealthField,
+  setCurrentDataOfGame,
+  setBestResult,
+  getBestResult,
+} from '../services';
+import { disablePage, enablePage } from '../helpers';
 
-function Game() {
-  this.running = true;
-  this.speedY = 8;
-  this.timer = 0;
-  this.enemyArray = [];
-  this.bonusArray = [];
-  this.explosionArray = [];
-  this.keyState = [];
-
-  this.background = new Background({
-    image: backgroundConfig.image,
-    positionX: backgroundConfig.positionX,
-    positionY: backgroundConfig.positionY,
-    width: playField.canvas.width,
-    height: playField.canvas.height,
-  });
-
-  this.unit = new Unit({ ...unitConfig });
-}
-
-Game.prototype.generateEnemy = function generateEnemy() {
-  this.timer += 1;
-  if (this.timer % 35 === 0) {
-    const enemy = new Enemy({
-      image: chooseSrcForEnemy(),
-      positionX: generateRandomXPosition(),
-      ...enemyConfig,
-    });
-
-    this.enemyArray.push(enemy);
+class Game {
+  constructor(backgroundInstance, unitInstance) {
+    this.running = true;
+    this.speedY = 8;
+    this.timer = 0;
+    this.enemyArray = [];
+    this.bonusArray = [];
+    this.explosionArray = [];
+    this.background = backgroundInstance;
+    this.unit = unitInstance;
+    this.keyState = [];
   }
-};
 
-Game.prototype.generateBonus = function generateBonus() {
-  if (this.timer % 10 === 0) {
-    const bonus = new Bonus({
-      image: bonusConfig.image,
-      positionX: generateRandomXPosition(),
-      positionY: bonusConfig.positionY,
-      width: bonusConfig.width,
-      height: bonusConfig.height,
-    });
-
-    if (this.timer % 100 === 0) {
-      bonus.image = imageAdapter('public/bonusSpeed.png');
-      bonus.width = bonusConfig.widthSpeedBonus;
-      bonus.height = bonusConfig.heightSpeedBonus;
-      bonus.boost = true;
-    }
-
-    this.bonusArray.push(bonus);
-  }
-};
-
-Game.prototype.collisionOccursEnemy = function collisionOccursEnemy() {
-  this.enemyArray.forEach((enemyItem) => {
-    if (collisionCheck(enemyItem, this.unit)) {
-      this.unit.health -= 1;
-
-      if (this.unit.health === 0) {
-        this.running = false;
-      }
-
-      const explosion = new Explosion({
-        positionX: enemyItem.positionX,
-        positionY: enemyItem.positionY + (enemyItem.height / 2),
-        ...explosionConfig,
+  generateEnemy = () => {
+    this.timer += 1;
+    if (this.timer % 35 === 0) {
+      const enemy = new Enemy({
+        image: chooseSrcForEnemy(),
+        positionX: generateRandomXPosition(),
+        ...enemyConfig,
       });
-      this.explosionArray.push(explosion);
+  
+      this.enemyArray.push(enemy);
     }
-  });
-};
+  };
 
-Game.prototype.collisionOccursBonus = function collisionOccursBonus() {
-  this.bonusArray.forEach((bonusItem, index) => {
-    if (collisionCheck(bonusItem, this.unit)) {
-      this.unit.score += 1;
-
-      if ('boost' in bonusItem) {
-        this.speedY = 12;
+  generateBonus = () => {
+    if (this.timer % 10 === 0) {
+      const bonus = new Bonus({
+        image: bonusConfig.image,
+        positionX: generateRandomXPosition(),
+        positionY: bonusConfig.positionY,
+        width: bonusConfig.width,
+        height: bonusConfig.height,
+      });
+  
+      if (this.timer % 100 === 0) {
+        bonus.image = imageAdapter('public/bonusSpeed.png');
+        bonus.width = bonusConfig.widthSpeedBonus;
+        bonus.height = bonusConfig.heightSpeedBonus;
+        bonus.boost = true;
       }
-
-      this.bonusArray.splice(index, 1);
+  
+      this.bonusArray.push(bonus);
     }
-  });
-};
+  };
 
-Game.prototype.moveEntities = function moveEntities() {
-  // move background
-  if (this.background.positionY > playField.canvas.height) {
-    const newPosition = this.background.positionY - playField.canvas.height;
+  collisionOccursEnemy = () => {
+    this.enemyArray.forEach((enemyItem) => {
+      if (collisionCheck(enemyItem, this.unit)) {
+        this.unit.health -= 1;
+  
+        if (this.unit.health === 0) {
+          this.running = false;
+        }
+  
+        const explosion = new Explosion({
+          positionX: enemyItem.positionX,
+          positionY: enemyItem.positionY + (enemyItem.height / 2),
+          ...explosionConfig,
+        });
+        this.explosionArray.push(explosion);
+      }
+    });
+  };
 
-    this.background.positionY = newPosition;
-  }
-  this.background.positionY += this.speedY;
+  collisionOccursBonus = () => {
+    this.bonusArray.forEach((bonusItem, index) => {
+      if (collisionCheck(bonusItem, this.unit)) {
+        this.unit.score += 1;
+  
+        if ('boost' in bonusItem) {
+          this.speedY = 12;
+        }
+  
+        this.bonusArray.splice(index, 1);
+      }
+    });
+  };
 
-  // move explosions
-  this.explosionArray.forEach((explosionItem, index) => {
-    explosionItem.positionY += this.speedY;
-    if (explosionItem.positionY > playField.canvas.height * 2) {
-      this.explosionArray.splice(index, 1);
+  moveEntities = () => {
+    // move background
+    if (this.background.positionY > playField.canvas.height) {
+      const newPosition = this.background.positionY - playField.canvas.height;
+  
+      this.background.positionY = newPosition;
     }
-  });
+    this.background.positionY += this.speedY;
+  
+    // move explosions
+    this.explosionArray.forEach((explosionItem, index) => {
+      explosionItem.positionY += this.speedY;
+      if (explosionItem.positionY > playField.canvas.height * 2) {
+        this.explosionArray.splice(index, 1);
+      }
+    });
+  
+    // move bonuses
+    this.bonusArray.forEach((bonusItem, index) => {
+      bonusItem.positionY += this.speedY;
+      if (bonusItem.positionY > playField.canvas.height * 2) {
+        this.bonusArray.splice(index, 1);
+      }
+    });
+  
+    // move enemies
+    this.enemyArray.forEach((enemyItem, index) => {
+      enemyItem.positionY += this.speedY;
+      if (enemyItem.positionY > playField.canvas.height * 2) {
+        this.enemyArray.splice(index, 1);
+      }
+    });
+  };
 
-  // move bonuses
-  this.bonusArray.forEach((bonusItem, index) => {
-    bonusItem.positionY += this.speedY;
-    if (bonusItem.positionY > playField.canvas.height * 2) {
-      this.bonusArray.splice(index, 1);
+  onKeyDown = (event) => {
+    this.keyState[event.keyCode] = true;
+  };
+  
+  onKeyUp = (event) => {
+    this.keyState[event.keyCode] = false;
+  };
+
+  unitMoving = () => {
+    if (this.keyState[KEY_CODES.RIGHT_ARROW]) {
+      this.unit.moveRight();
     }
-  });
-
-  // move enemies
-  this.enemyArray.forEach((enemyItem, index) => {
-    enemyItem.positionY += this.speedY;
-    if (enemyItem.positionY > playField.canvas.height * 2) {
-      this.enemyArray.splice(index, 1);
+    if (this.keyState[KEY_CODES.LEFT_ARROW]) {
+      this.unit.moveLeft();
     }
-  });
-};
+  };
 
-Game.prototype.over = function over() {
-  return this.unit.health === 0;
-};
-
-Game.prototype.restart = function restart() {
-  this.bonusArray = [];
-  this.enemyArray = [];
-  this.explosionArray = [];
-  this.speedY = 8;
-  this.unit.score = unitConfig.score;
-  this.unit.health = unitConfig.health;
-  this.background.positionY = backgroundConfig.positionX;
-  this.running = true;
-};
-
-Game.prototype.unitMoving = function unitMoving() {
-  if (this.keyState[KEY_CODES.RIGHT_ARROW]) {
-    this.unit.moveRight();
-  }
-  if (this.keyState[KEY_CODES.LEFT_ARROW]) {
-    this.unit.moveLeft();
-  }
-  if (this.keyState[KEY_CODES.DOWN_ARROW]) {
-    this.speedY -= 0.2;
-    if (this.speedY < 8) {
-      this.speedY = 8;
+  checkSpeedGame = () => {
+    if (this.keyState[KEY_CODES.DOWN_ARROW]) {
+      this.speedY -= 0.2;
+      if (this.speedY < 8) {
+        this.speedY = 8;
+      }
     }
-  }
-};
+  
+    if (this.speedY >= 12) {
+      this.unit.image = imageAdapter('public/supermanBoost.png');
+    } else {
+      this.unit.image = unitConfig.image;
+    }
+  };
 
-Game.prototype.changeUnit = function changeUnit() {
-  if (this.speedY >= 12) {
-    this.unit.image = imageAdapter('public/supermanBoost.png');
-  } else {
-    this.unit.image = unitConfig.image;
-  }
-};
+  over = () => { return this.unit.health === 0; };
 
-Game.prototype.update = function update() {
-  this.unitMoving();
-  this.changeUnit();
-  this.generateEnemy();
-  this.generateBonus();
-  this.collisionOccursEnemy();
-  this.collisionOccursBonus();
-  this.moveEntities();
-};
+  pause = () => { this.running = false; };
 
-Game.prototype.render = function render() {
-  this.background.drawBack();
+  resume = () => { this.running = true; };
 
-  this.enemyArray.forEach((enemyItem) => {
-    enemyItem.draw();
-  });
+  restart = () => {
+    disablePage(gameOverPage);
+    this.bonusArray = [];
+    this.enemyArray = [];
+    this.explosionArray = [];
+    this.speedY = 8;
+    this.unit.score = unitConfig.score;
+    this.unit.health = unitConfig.health;
+    this.background.positionY = backgroundConfig.positionX;
+    this.running = true;
+  };
 
-  this.bonusArray.forEach((bonusItem) => {
-    bonusItem.draw();
-  });
+  checkGameOver = () => {
+    if (this.over()) {
+      setBestResult(this.unit.score);
+      enablePage(gameOverPage);
+      return false;
+    }
 
-  this.explosionArray.forEach((explosionItem) => {
-    explosionItem.drawExplosion();
-  });
+    return true;
+  };
 
-  this.unit.draw();
-};
+  start = () => {
+    disablePage(welcomePage);
+    getBestResult(bestScoreField);
+    setCurrentDataOfGame(this.unit, currentScoreField, currentHealthField);
+
+    if (this.running) {
+      this.update();
+      this.render();
+    }
+
+    if (this.checkGameOver()) {
+      requestAnimationFrame(this.start);
+    }
+  };
+
+  update = () => {
+    this.unitMoving();
+    this.checkSpeedGame();
+    this.generateEnemy();
+    this.generateBonus();
+    this.collisionOccursEnemy();
+    this.collisionOccursBonus();
+    this.moveEntities();
+  };
+
+  render = () => {
+    this.background.drawBack();
+
+    this.enemyArray.forEach((enemyItem) => {
+      enemyItem.draw();
+    });
+
+    this.bonusArray.forEach((bonusItem) => {
+      bonusItem.draw();
+    });
+
+    this.explosionArray.forEach((explosionItem) => {
+      explosionItem.drawExplosion();
+    });
+
+    this.unit.draw();
+  };
+  
+}
 
 export { Game };
